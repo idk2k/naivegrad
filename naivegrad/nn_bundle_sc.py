@@ -1,4 +1,4 @@
-from naivegrad.core import Scalar
+from naivegrad.core_sc import Scalar
 
 class Module:
     def zero_grad(self):
