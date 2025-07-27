@@ -74,3 +74,24 @@ for k in range(100):
 
     if k % 1 == 0:
         print(f"step {k} loss {total_loss.data}, accuracy {acc * 100}%")
+
+
+# try to viz
+h = 0.25
+x_min, x_max = X[:,0].min() - 1, X[:,0].max() + 1
+y_min, y_max = X[:,1].min() - 1, X[:,1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                     np.arange(y_min, y_max, h))
+
+Xmesh = np.c_[xx.ravel(), yy.ravel()]
+inputs = [list(map(Scalar, xrow)) for xrow in Xmesh]
+scores = list(map(model, inputs))
+
+Z = np.array([s.data > 0 for s in scores])
+Z = Z.reshape(xx.shape)
+
+fig = plt.figure()
+plt.contourf(xx, yy, Z, cmap=plt.cm.Spectral, alpha=0.8)
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cma[=plt.cm.Spectral])
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
