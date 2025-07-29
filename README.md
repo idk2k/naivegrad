@@ -1,11 +1,15 @@
 # naivegrad - Naive Implementation of Auto-Grad System
 Inspired by *grad libraries and PyTorch.
 ## Background
-Try to implement basic base-blocks of nn: `optimizers: Adam, SGD`, `forward pass graph creation`,  two mode `auto-differentiation` (reverse/`backward` and `forward`), `gradient accumulators in ctx`, `some basic NN utilities: layers, neurons, MLPs, backpropagation`.
+Try to implement basic base-blocks of nn:
+- `optimizers: Adam, SGD`
+- `forward pass graph creation`
+- two mode `auto-differentiation` (reverse/`backward` and `forward`)
+- `gradient accumulators in ctx`
+- `some basic NN utilities: layers, neurons, MLPs, backpropagation`.
 
-Below is basic example of auto diff in reverse mode, with graph representation.
-![](resources/images/topology.png)
-
+Below is basic example of auto diff in reverse mode, with graph representation.\
+<img src="resources/images/topology.png" alt="topology" width="600"/>
 
 ## Special thanks to
     - https://sidsite.com/posts/autodiff/
