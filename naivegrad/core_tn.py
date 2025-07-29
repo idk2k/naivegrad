@@ -65,12 +65,13 @@ class Function:
         ret._ctx = ctx
         return ret
     
-# bind it with tensor
+# bind apply method of some fxn function to Tensor core
 def register(name, fxn):
     setattr(Tensor, name, partialmethod(fxn.apply, fxn))
 
 # ** OPS **
 
+# https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html
 class ReLU(Function):
     @staticmethod
     def forward(ctx, input):
@@ -83,7 +84,7 @@ class ReLU(Function):
         grad_input = grad.output.copy()
         grad_input[input < 0] = 0
         return grad_input
-register('relu', ReLU)
+register("relu", ReLU)
 
 # https://github.com/Emperor-WS/PyEmber/blob/main/ember/autograd/function.py
 # https://numpy.org/doc/stable/reference/generated/numpy.dot.html
@@ -100,7 +101,7 @@ class Dot(Function):
         grad_input = grad_output.dot(weight.T)
         grad_weight = grad_output.T.dot(input).T
         return grad_input, grad_weight
-register('dot', Dot)
+register("dot", Dot)
 
 # https://numpy.org/doc/stable/reference/generated/numpy.sum.html
 class Sum(Function):
@@ -113,7 +114,7 @@ class Sum(Function):
     def backward(ctx, grad_output):
         input, = ctx.saved_tensors
         return grad_output * np.ones_like(input)
-register('sum', Sum)
+register("sum", Sum)
 
 # as simple as possible to understand
 class Mul(Function):
@@ -130,6 +131,7 @@ class Mul(Function):
         x, y = ctx.saved_tensors
         return y * grad_output, x * grad_output
 
+# https://docs.pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html
 class LogSoftmax(Function):
     @staticmethod
     def forward(ctx, input):
@@ -144,4 +146,4 @@ class LogSoftmax(Function):
     def backward(ctx, grad_output):
         output, = ctx.saved_tensors
         return grad_output - np.exp(output) * grad_output.sum(axis=1).reshape((-1, 1))
-register('logsoftmax', LogSoftmax)
+register("logsoftmax", LogSoftmax)

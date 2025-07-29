@@ -1,13 +1,11 @@
-'''
-    REQUIRED PyTorch
-    (or another reference framework with reverse-mode autodiff module)
-'''
+# pytorch required
+# pylint fix required (pylint: disable=missing-docstring)
 
 import torch
 from naivegrad.core_sc import Scalar
 
-def test_sanity_check():
-    x = Scalar(-4.0)
+def test_sanity_check() -> None:
+    x: Scalar = Scalar(-4.0)
     z = 2 * x + 2 + x
     q = z.relu() + z * x
     h = (z * z).relu()
@@ -28,9 +26,9 @@ def test_sanity_check():
     # backward pass check
     assert xmg.grad = ypt.grad.item()
 
-def test_more_ops():
-    a = Scalar(-4.0)
-    b = Scalar(2.0)
+def test_more_ops() -> None:
+    a: Scalar = Scalar(-4.0)
+    b: Scalar = Scalar(2.0)
     c = a + b
     d = a * b + b**3
     c += c + 1
