@@ -86,6 +86,8 @@ class ReLU(Function):
 register('relu', ReLU)
 
 # https://github.com/Emperor-WS/PyEmber/blob/main/ember/autograd/function.py
+# https://numpy.org/doc/stable/reference/generated/numpy.dot.html
+# 2D.dot(2D) = 2D @ 2D (matrix mult)
 class Dot(Function):
     @staticmethod
     def forward(ctx, input, weight):
@@ -100,6 +102,7 @@ class Dot(Function):
         return grad_input, grad_weight
 register('dot', Dot)
 
+# https://numpy.org/doc/stable/reference/generated/numpy.sum.html
 class Sum(Function):
     @staticmethod
     def forward(ctx, input, weight):
@@ -112,13 +115,28 @@ class Sum(Function):
         return grad_output * np.ones_like(input)
 register('sum', Sum)
 
+# as simple as possible to understand
+class Mul(Function):
+    @staticmethod
+    def forward(ctx, x, y):
+        ctx.save_for_backward(x, y)
+        # not dot and not matrix multiplication
+        # * - multiplication each term of x with each corresponding term in y
+        # @ - matmul
+        return x * y
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        x, y = ctx.saved_tensors
+        return y * grad_output, x * grad_output
+
 class LogSoftmax(Function):
     @staticmethod
-    def forward(ctx, input, weight):
+    def forward(ctx, input):
         def logsume(x):
             c = x.max(axis=1)
-            return c + np.log(np.exp(x-c.reshape((-1, 1))).sum(axis=1))
-        output = input - logsume(input)
+            return c + np.log( np.exp( x - c.reshape((-1, 1)) ).sum(axis=1) )
+        output = input - logsume(input).reshape((-1, 1))
         ctx.save_for_backward(output)
         return output
 
