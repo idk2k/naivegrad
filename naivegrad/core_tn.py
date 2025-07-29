@@ -9,6 +9,7 @@
 '''
 
 import numpy as np
+from functools import partialmethod
 
 class Ctx:
     def __init__(self, arg, *tns):
@@ -64,8 +65,9 @@ class Function:
         ret._ctx = ctx
         return ret
     
-    def register(name, fxn):
-        setattr(Tensor, name, partialmethod(fxn.apply, fxn))
+# bind it with tensor
+def register(name, fxn):
+    setattr(Tensor, name, partialmethod(fxn.apply, fxn))
 
 # ** OPS **
 
