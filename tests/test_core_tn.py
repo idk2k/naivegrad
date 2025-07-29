@@ -1,3 +1,6 @@
+# pytorch required
+# pylint fix required
+
 import numpy as np
 import torch
 from naivegrad.core_tn import Tensor
@@ -19,5 +22,4 @@ def test_tensor_core() -> None:
     outm = outl.mul(m)
     outx = outm.sum()
     outx.backward()
-    print(f"{outx.data} {x.grad} {W.grad}")
-    
+    print(f"outx.data={outx.data} >>> x.grad={x.grad} >>> W.grad={W.grad};")

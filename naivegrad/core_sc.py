@@ -1,3 +1,6 @@
+'''
+    Scalar Core
+'''
 
 from typing import Union, Tuple, List, Set, Callable
 
