@@ -41,6 +41,21 @@ def initialize_layer(m, h):
     ret = np.random.uniform(-1., 1., size=(m, h))/np.sqrt(m*h)
     return ret.astype(np.float32)
 
+class NaiveNet:
+    '''
+        Naive model for MNIST with 128 hidden layer
+    '''
+    def __init__(self):
+        self.l1 = Tensor(initialize_layer(784, 128))
+        self.l2 = Tensor(initialize_layer(128, 10))
+
+    def forward(self, x):
+        ret = x.dot(self.l1).relu().dot(self.l2).logsoftmax()
+        return ret
+
+model_instance = NaiveNet()
+
+
 # big weight Tensors
 # why hidden layer is 128 ? : http://vbystricky.ru/2017/10/mnist_cnn.htmls
 l1 = Tensor(initialize_layer(784, 128))
@@ -58,38 +73,31 @@ for i in (t := trange(1000)):
     y[range(y.shape[0]), Y] = -1.0
     y = Tensor(y)
 
-    x = x.dot(l1)
-    x = x.relu()
-    x = x_l2 = x.dot(l2)
-    x = x.logsoftmax()
-    x = x.mul(y)
-    x = x.mean()
-    x.backward()
+    outs = model_instance.forward(x)
 
-    loss = x.data
-    cat = np.argmax(x_l2.data, axis=1)
+    # NLL loss
+    loss = outs.mul(y).mean()
+    loss.backward()
+
     accuracy = (cat == Y).mean()
 
     # sgd
-    l1.data = l1.data - lr * l1.grad
-    l2.data = l2.data - lr * l2.grad
+    model_instance.l1.data = model_instance.l1.data - lr * model_instance.l1.grad
+    model_instance.l2.data = model_instance.l2.data - lr * model_instance.l2.grad
 
+    loss = loss.data
     losses.append(loss)
     accuracies.append(accuracy)
     #t.set_description(f"loss {loss:.2f} accuracy {accuracy:.2f}")
     t.set_description("loss %.2f accuracy %.2f" % (loss, accuracy))
 
-# forward pass
-def forward(x):
-    x = x.dot(l1.data)
-    x = np.maximum(x, 0)
-    x = x.dot(l2.data)
-    return x
-
 def predict():
-    Y_test_predict_out = forward(X_test.reshape((-1, 28*28)))
-    Y_test_predict = np.argmax(Y_test_predict_out, axis=1)
+    Y_test_predict_out = model_instance.forward(Tensor(X_test.reshape((-1, 28*28))))
+    Y_test_predict = np.argmax(Y_test_predict_out.data, axis=1)
     return (Y_test == Y_test_predict).mean()
 
-# Prediction:  ~0.9585
-print("Prediction: ", predict())
+# Prediction:  ~0.958500
+accuracy = predict()
+print("Prediction: ", accuracy)
+
+assert accuracy > 0.952101

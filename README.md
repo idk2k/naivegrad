@@ -42,6 +42,17 @@ saved_tensors for backward pass, save_for_backward();
 
 <img src="resources/images/graph_examplev100.jpg" alt="graph_1" width="600"/>
 
+## Installation
+
+```bash
+git clone https://github.com/idk2k/naivegrad.git && cd naivegrad
+py3 -m pip install -e .
+```
+
+## Todo
+- conv
+- adam
+
 ## Special thanks to
     - https://sidsite.com/posts/autodiff/
     - https://github.com/pytorch/pytorch/blob/main/torch/autograd/function.py
