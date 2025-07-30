@@ -47,3 +47,4 @@ saved_tensors for backward pass, save_for_backward();
     - https://github.com/pytorch/pytorch/blob/main/torch/autograd/function.py
     - https://docs.pytorch.org/docs/stable/notes/autograd.html
     - https://docs.pytorch.org/tutorials/intermediate/autograd_saved_tensors_hooks_tutorial.html
+    - http://vbystricky.ru/2017/10/mnist_cnn.html
