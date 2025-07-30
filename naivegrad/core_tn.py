@@ -11,10 +11,10 @@ import numpy as np
 from functools import partialmethod
 
 class Ctx:
-    def __init__(self, arg, *tns):
-        self.arg = arg
-        self.parents = tensors
-        self.saved_tensors = []
+    def __init__(self, arg, *tensors):
+        self.arg = arg # op function: for example ReLU
+        self.parents = tensors # input tensors, including on which applied
+        self.saved_tensors = [] # for backward pass
 
     def save_for_backward(self, *tensors):
         '''
@@ -35,23 +35,26 @@ class Tensor:
         # inspired by pytorch
         self._ctx = None
     
+    # allow_fill only for root Tensor, next i use t.backward(False)
     def backward(self, allow_fill=True) -> None:
         if self._ctx is None:
             return
+
         if self.grad is None and allow_fill:
             assert self.data.size == 1
             self.grad = np.ones_like(self.data)
-
         assert self.grad is not None
 
         grads = self._ctx.arg.backward(self._ctx, self.grad)
         if len(self._ctx.parents) == 1:
-            grads [grads]
+            grads = [grads]
+        # for each parent a
         for t, g in zip(self._ctx.parents, grads):
             if g.shape != t.data.shape:
                 print("[err]: grad musth match with tensor")
                 assert(False)
             t.grad = g
+            # recursive for each parent
             t.backward(False)
 
     def __str__(self) -> str:
@@ -59,7 +62,10 @@ class Tensor:
 
 class Function:
     def apply(self, arg, *x):
-        ctx = Context(arg, self, *x)
+        # generate context for that operation: arg is OPS function (i.e. ReLU)
+        # self and *x - are input tensors
+        ctx = Ctx(arg, self, *x)
+        # create new resulting Tensor and passing input Tensors to it
         ret = Tensor(arg.forward(ctx, self.data, *[t.data for t in x]))
         ret._ctx = ctx
         return ret
@@ -129,6 +135,7 @@ class Mul(Function):
     def backward(ctx, grad_output):
         x, y = ctx.saved_tensors
         return y * grad_output, x * grad_output
+register("mul", Mul)
 
 # https://docs.pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html
 class LogSoftmax(Function):

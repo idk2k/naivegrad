@@ -11,6 +11,17 @@ Try to implement basic base-blocks of nn:
 Below is basic example of auto diff in reverse mode, with graph representation.\
 <img src="resources/images/topology.png" alt="topology" width="600"/>
 
+Version 1.x.0 (e6766b3db951e0efde3bbfb2640189b66d376dc4):
+- Ctx contain: OP function instance (for example ReLU), parents ( a + b = c then a,b is parents which produced c )
+saved_tensors for backward pass, save_for_backward();
+- Each Tensor stores context Ctx in _ctx; data and grad.
+- On OP .apply() Ctx is created and then forward() called to create output Tensor, and Ctx is stored in that Tensor _ctx field.
+- Each Tensor have backward() which is goes if _ctx is not None. Then it recursively apply backward() to parents.
+- Also backward() passes ctx and grad of output tensor (a + b = c then c.grad  is grad of output tensor). gets output and apply it assign it to parents t.grad.
+
+
+<img src="resources/images/graph_examplev100.jpg" alt="graph_1" width="600"/>
+
 ## Special thanks to
     - https://sidsite.com/posts/autodiff/
     - https://github.com/pytorch/pytorch/blob/main/torch/autograd/function.py
