@@ -42,6 +42,7 @@ def initialize_layer(m, h):
     return ret.astype(np.float32)
 
 # big weight Tensors
+# why hidden layer is 128 ? : http://vbystricky.ru/2017/10/mnist_cnn.htmls
 l1 = Tensor(initialize_layer(784, 128))
 l2 = Tensor(initialize_layer(128, 10))
 
