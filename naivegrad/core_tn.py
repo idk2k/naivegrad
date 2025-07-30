@@ -57,6 +57,10 @@ class Tensor:
             # recursive for each parent
             t.backward(False)
 
+    def mean(self):
+        div = Tensor(np.array([1/self.data.size]))
+        return self.sum().mul(div)
+
     def __str__(self) -> str:
         return f"Tensor(data={self.data}, grad={self.grad})"
 
@@ -86,7 +90,7 @@ class ReLU(Function):
     @staticmethod
     def backward(ctx, grad_output):
         input, = ctx.saved_tensors
-        grad_input = grad.output.copy()
+        grad_input = grad_output.copy()
         grad_input[input < 0] = 0
         return grad_input
 register("relu", ReLU)
@@ -111,9 +115,9 @@ register("dot", Dot)
 # https://numpy.org/doc/stable/reference/generated/numpy.sum.html
 class Sum(Function):
     @staticmethod
-    def forward(ctx, input, weight):
+    def forward(ctx, input):
         ctx.save_for_backward(input)
-        return np.array(input.sum())
+        return np.array([input.sum()])
 
     @staticmethod
     def backward(ctx, grad_output):
