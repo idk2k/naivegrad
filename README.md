@@ -8,8 +8,28 @@ Try to implement basic base-blocks of nn:
 - `gradient accumulators in ctx`
 - `some basic NN utilities: layers, neurons, MLPs, backpropagation`.
 
+## Usage
+
+```python
+import numpy as np
+from naivegrad.core_tn import Tensor
+
+# Creating a Tensor instances and performing some operations (OPs)
+x = Tensor(np.eye(3))
+y = Tensor(np.array([[1.0, 1.0, -1.0]]))
+z = y.dot(x).sum()
+z.backward()
+
+# Print gradient for x and y Tensor instances in computation graph
+print(f"x.grad={x.grad}=dz/dz, y.grad={y.grad}=dz/dy")
+```
+
+## Architecture
+
 Below is basic example of auto diff in reverse mode, with graph representation.\
 <img src="resources/images/topology.png" alt="topology" width="600"/>
+
+## History
 
 Version 1.x.0 (e6766b3db951e0efde3bbfb2640189b66d376dc4):
 - Ctx contain: OP function instance (for example ReLU), parents ( a + b = c then a,b is parents which produced c )
