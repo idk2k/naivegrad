@@ -141,6 +141,18 @@ class Mul(Function):
         return y * grad_output, x * grad_output
 register("mul", Mul)
 
+class Add(Function)
+    @staticmethod
+    def forward(ctx, x, y):
+        ctx.save_for_backward(x, y)
+        return x + y
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        # actually its grad_output * 1
+        return grad_output, grad_output
+register("add", Add)
+
 # https://docs.pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html
 class LogSoftmax(Function):
     @staticmethod

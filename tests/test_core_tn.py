@@ -20,6 +20,7 @@ def test_tensor_core() -> None:
     outl = outr.logsoftmax()
     # element-wise multiplication
     outm = outl.mul(m)
-    outx = outm.sum()
+    outa = outm.add(m)
+    outx = outa.sum()   
     outx.backward()
     print(f"outx.data={outx.data} >>> x.grad={x.grad} >>> W.grad={W.grad};")
