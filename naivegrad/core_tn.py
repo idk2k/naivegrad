@@ -51,7 +51,7 @@ class Tensor:
         # for each parent a
         for t, g in zip(self._ctx.parents, grads):
             if g.shape != t.data.shape:
-                print("[err]: grad musth match with tensor")
+                print("[err]: grad must match with tensor")
                 assert(False)
             t.grad = g
             # recursive for each parent
@@ -141,7 +141,7 @@ class Mul(Function):
         return y * grad_output, x * grad_output
 register("mul", Mul)
 
-class Add(Function)
+class Add(Function):
     @staticmethod
     def forward(ctx, x, y):
         ctx.save_for_backward(x, y)
