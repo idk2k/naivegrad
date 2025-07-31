@@ -57,7 +57,18 @@ class NaiveNet:
         ret = x.dot(self.l1).relu().dot(self.l2).logsoftmax()
         return ret
 
+# test sgd optimizer
+class SGD:
+    def __init__(self, tensors, lr):
+        self.tensors = tensors
+        self.lr = lr
+    
+    def step(self):
+        for i in self.tensors:
+            t.data -= self.lr * t.grad
+
 model_instance = NaiveNet()
+sgd_optimizer = SGD([model_instance.l1, model_instance.l2], lr=0.01)
 
 
 # big weight Tensors
@@ -83,11 +94,10 @@ for i in (t := trange(1000)):
     loss = outs.mul(y).mean()
     loss.backward()
 
-    accuracy = (cat == Y).mean()
+    # SGD step
+    sgd_optimizer.step()
 
-    # sgd
-    model_instance.l1.data = model_instance.l1.data - lr * model_instance.l1.grad
-    model_instance.l2.data = model_instance.l2.data - lr * model_instance.l2.grad
+    accuracy = (cat == Y).mean() 
 
     loss = loss.data
     losses.append(loss)

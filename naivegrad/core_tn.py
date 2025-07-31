@@ -39,7 +39,7 @@ class Tensor:
         # for each parent a
         for t, g in zip(self._ctx.parents, grads):
             if g.shape != t.data.shape:
-                print("[err]: grad must match with tensor")
+                print(f"[err]: grad must match with tensor in _ctx={self._ctx}, g.shape={g.shape} t.data.shape={t.data.shape}")
                 assert(False)
             t.grad = g
             # recursive for each parent
@@ -52,9 +52,10 @@ class Tensor:
     def __str__(self) -> str:
         return f"Tensor(data={self.data}, grad={self.grad})"
 
+# class instance of Function stores implicit Context of OP
 class Function:
     # implicit context inside Function
-    def __init(self, *tensors):
+    def __init__(self, *tensors):
         self.parents = tensors # input tensors, including on which applied
         self.saved_tensors = [] # for backward pass
 

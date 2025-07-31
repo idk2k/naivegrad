@@ -23,6 +23,6 @@ jobs:
     - name: Install Dependencies
       run: pip install ipython tqdm requests numpy
     - name: Install naivegrad
-      run: pip install -e .
+      run: pip install -e ~/work/naivegrad/naivegrad/
     - name: Run Tests
       run: ipython3 examples/demo/demo_tensor_example.py
