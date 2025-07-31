@@ -25,5 +25,6 @@ jobs:
     - name: Install naivegrad
       run: pip install -e ~/work/naivegrad/naivegrad/
     - name: Run Tests
-      run: ipython3 examples/demo/demo_tensor_example.py
-      run: ipython3 examples/mnist.py
+      run: |
+        ipython3 examples/demo/demo_tensor_example.py
+        ipython3 examples/mnist.py
