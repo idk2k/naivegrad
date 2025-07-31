@@ -29,7 +29,7 @@ class NaiveNet:
 model_instance = NaiveNet()
 
 # Optimizer
-sgd_optimizer = optim.SGD([model_instance.l1, model_instance.l2], lr=0.01)
+sgd_optimizer = optim.SGD([model_instance.l1, model_instance.l2], lr=0.001)
 #adam_optimizer = optim.Adam([model_instance.l1, model_instance.l2], lr=0.01)
 
 # Train
