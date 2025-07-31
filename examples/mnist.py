@@ -1,49 +1,25 @@
 #!/usr/bin/env python
 
 import numpy as np
-from naivegrad.core_tn import Tensor
 from tqdm import trange
+
+from naivegrad.core_tn import Tensor
+from naivegrad.nn_bundle_tn import initialize_layer, SGD
+from naivegrad.utils import fetch_mnist
 
 # load dataset for static version (TO REMOVE)
 # def fetch_ds(url):
 #     import gzip, requests
-#     # [TODO]: check if folder exist, add proper error handling
 #     with open(url, "rb") as src:
 #         dat = src.read()
 #     return np.frombuffer(gzip.decompress(dat), dtype=np.uint8).copy()
-
-# # Yann LeCunn datasets links now not works good
-# # yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
 # X_train = fetch_ds("train-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
 # Y_train = fetch_ds("train-labels-idx1-ubyte.gz")[8:]
 # X_test = fetch_ds("t10k-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
 # Y_test = fetch_ds("t10k-labels-idx1-ubyte.gz")[8:]
 
-# load dataset
-def fetch(url):
-    import requests, gzip, os, hashlib, numpy
-    fp = os.path.join("/tmp", hashlib.md5(url.encode('utf-8')).hexdigest())
-    if os.path.isfile(fp):
-        with open(fp, "rb") as f:
-            dat = f.read()
-    else:
-        with open(fp, "wb") as f:
-            dat = requests.get(url).content
-            f.write(dat)
-    return numpy.frombuffer(gzip.decompress(dat), dtype=np.uint8).copy()
-
-# Yann LeCunn datasets links now not works good
-# yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
-X_train = fetch_ds("https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
-Y_train = fetch_ds("https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz")[8:]
-X_test = fetch_ds("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
-Y_test = fetch_ds("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz")[8:]
-
-# training the model
-
-def initialize_layer(m, h):
-    ret = np.random.uniform(-1., 1., size=(m, h))/np.sqrt(m*h)
-    return ret.astype(np.float32)
+# load ds
+X_train, Y_train, X_test, Y_test = fetch_mnist()
 
 class NaiveNet:
     '''
@@ -57,22 +33,11 @@ class NaiveNet:
         ret = x.dot(self.l1).relu().dot(self.l2).logsoftmax()
         return ret
 
-# test sgd optimizer
-class SGD:
-    def __init__(self, tensors, lr):
-        self.tensors = tensors
-        self.lr = lr
-    
-    def step(self):
-        for i in self.tensors:
-            t.data -= self.lr * t.grad
-
 model_instance = NaiveNet()
 sgd_optimizer = SGD([model_instance.l1, model_instance.l2], lr=0.01)
 
-
-# big weight Tensors
-# why hidden layer is 128 ? : http://vbystricky.ru/2017/10/mnist_cnn.htmls
+# Weights tensor. Why hidden layer is 128 ?
+# http://vbystricky.ru/2017/10/mnist_cnn.htmls
 l1 = Tensor(initialize_layer(784, 128))
 l2 = Tensor(initialize_layer(128, 10))
 
@@ -102,7 +67,6 @@ for i in (t := trange(1000)):
     loss = loss.data
     losses.append(loss)
     accuracies.append(accuracy)
-    #t.set_description(f"loss {loss:.2f} accuracy {accuracy:.2f}")
     t.set_description("loss %.2f accuracy %.2f" % (loss, accuracy))
 
 def predict():
@@ -110,7 +74,7 @@ def predict():
     Y_test_predict = np.argmax(Y_test_predict_out.data, axis=1)
     return (Y_test == Y_test_predict).mean()
 
-# Prediction:  ~0.958500
+# Prediction
 accuracy = predict()
 print("Prediction: ", accuracy)
 
