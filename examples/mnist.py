@@ -20,13 +20,17 @@ from tqdm import trange
 # Y_test = fetch_ds("t10k-labels-idx1-ubyte.gz")[8:]
 
 # load dataset
-def fetch_ds(url):
-    import gzip
-    # [TODO]: check if folder exist, add proper error handling
-    with open(test.dat, "wb") as f:
-        raw_dataset = requests.get(url).content
-        f.write(raw_dataset)
-    return np.frombuffer(gzip.decompress(dat), dtype=np.uint8).copy()
+def fetch(url):
+    import requests, gzip, os, hashlib, numpy
+    fp = os.path.join("/tmp", hashlib.md5(url.encode('utf-8')).hexdigest())
+    if os.path.isfile(fp):
+        with open(fp, "rb") as f:
+            dat = f.read()
+    else:
+        with open(fp, "wb") as f:
+            dat = requests.get(url).content
+            f.write(dat)
+    return numpy.frombuffer(gzip.decompress(dat), dtype=np.uint8).copy()
 
 # Yann LeCunn datasets links now not works good
 # yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
