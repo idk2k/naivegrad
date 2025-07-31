@@ -4,11 +4,11 @@ def fetch_mnist():
         fp = os.path.join("/tmp", hashlib.md5(url.encode('utf-8')).hexdigest())
         if not os.path.isfile(fp):
             with open(fp, "rb") as f:
-            dat = f.read()
+                dat = f.read()
         else:
             with open(fp, "wb") as f:
-            dat = requests.get(url).content
-            f.write(dat)
+                dat = requests.get(url).content
+                f.write(dat)
         return numpy.frombuffer(gzip.decompress(dat), dtype=numpy.uint8).copy()
     # urls are fixed, cause LeCunn dont maintain his ds
     X_train = fetch_ds("https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
