@@ -3,13 +3,10 @@ import numpy as np
 from tqdm import trange
 
 from naivegrad.core_tn import Tensor
-from naivegrad.utils import fetch_mnist
+from naivegrad.utils import fetch_mnist, initialize_layer_uniform
 import naivegrad.optimizer as optim
 
 np.random.seed(1337)
-def initialize_layer(m, h):
-    ret = np.random.uniform(-1., 1., size=(m, h)) / np.sqrt(m * h)
-    return ret.astype(np.float32)
 
 # load ds
 X_train, Y_train, X_test, Y_test = fetch_mnist()
@@ -19,8 +16,8 @@ class NaiveNet:
         Naive model for MNIST with 128 hidden layer
     '''
     def __init__(self):
-        self.l1 = Tensor(initialize_layer(784, 128))
-        self.l2 = Tensor(initialize_layer(128, 10))
+        self.l1 = Tensor(initialize_layer_uniform(784, 128))
+        self.l2 = Tensor(initialize_layer_uniform(128, 10))
 
     def forward(self, x):
         ret = x.dot(self.l1).relu().dot(self.l2).logsoftmax()
