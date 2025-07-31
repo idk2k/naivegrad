@@ -49,7 +49,7 @@ class Tensor:
         div = Tensor(np.array([1 / self.data.size]))
         return self.sum().mul(div)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"Tensor(data={self.data}, grad={self.grad})"
 
 # class instance of Function stores implicit Context of OP

@@ -43,11 +43,11 @@ for i in (t := trange(1000)):
     y[range(y.shape[0]), Y] = -10.0
     y = Tensor(y)
 
-    outs = model_instance.forward(x)
+    out = model_instance.forward(x)
 
     # NLL (Negative Log-Likelihood) loss
     # https://docs.pytorch.org/docs/stable/generated/torch.nn.NLLLoss.html
-    loss = outs.mul(y).mean()
+    loss = out.mul(y).mean()
     loss.backward()
 
     # SGD step
@@ -56,12 +56,12 @@ for i in (t := trange(1000)):
     # Adam step: BUT IMPLEMENTATION IS BAD PROBABLY: prediction 0.6
     #adam_optimizer.step()
 
-    accuracy = (np.argmax(outs.data, axis=1) == Y).mean() 
+    accuracy = (np.argmax(out.data, axis=1) == Y).mean() 
 
     loss = loss.data
     losses.append(loss)
     accuracies.append(accuracy)
-    t.set_description("loss %.2f accuracy %.2f" % (loss, accuracy))
+    t.set_description(f"loss={loss.item():.2f}, accuracy={accuracy.item():.2f}")
 
 def predict():
     Y_test_predict_out = model_instance.forward(Tensor(X_test.reshape((-1, 28*28))))

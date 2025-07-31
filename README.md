@@ -44,7 +44,11 @@ class NaiveNet:
 model_instance = NaiveNet()
 sgd_optimizer = optim.SGD([model_instance.l1, model_instance.l2], lr=0.001)
 
-# ...
+# Then with training for-loop
+out = model.forward(x)
+loss = out.mul(y).mean()
+loss.backward()
+optim.step()
 ```
 
 ## Architecture
