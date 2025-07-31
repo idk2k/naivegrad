@@ -22,5 +22,7 @@ jobs:
         python-version: 3.8
     - name: Install Dependencies
       run: pip install ipython tqdm requests numpy
+    - name: Install naivegrad
+      run: pip install -e .
     - name: Run Tests
       run: ipython3 examples/demo/demo_tensor_example.py
