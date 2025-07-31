@@ -10,19 +10,6 @@
 import numpy as np
 from functools import partialmethod
 
-class Ctx:
-    def __init__(self, arg, *tensors):
-        self.arg = arg # op function: for example ReLU
-        self.parents = tensors # input tensors, including on which applied
-        self.saved_tensors = [] # for backward pass
-
-    def save_for_backward(self, *tensors):
-        '''
-        for default OPS tensors saved as needed,
-        but not for custom
-        '''
-        self.saved_tensors.extend(tensors)
-
 class Tensor:
     '''Tensor-valued with grad abilitys here'''
     def __init__(self, data) -> None:
@@ -42,10 +29,11 @@ class Tensor:
 
         if self.grad is None and allow_fill:
             assert self.data.size == 1
+            # hard-grad to 1 (useful for root of computation graph)
             self.grad = np.ones_like(self.data)
         assert self.grad is not None
 
-        grads = self._ctx.arg.backward(self._ctx, self.grad)
+        grads = self._ctx.backward(self._ctx, self.grad)
         if len(self._ctx.parents) == 1:
             grads = [grads]
         # for each parent a
@@ -65,10 +53,22 @@ class Tensor:
         return f"Tensor(data={self.data}, grad={self.grad})"
 
 class Function:
+    # implicit context inside Function
+    def __init(self, *tensors):
+        self.parents = tensors # input tensors, including on which applied
+        self.saved_tensors = [] # for backward pass
+
+    def save_for_backward(self, *tns):
+        '''
+        for default OPS tensors saved as needed,
+        but not for custom
+        '''
+        self.saved_tensors.extend(tns)
+
     def apply(self, arg, *x):
         # generate context for that operation: arg is OPS function (i.e. ReLU)
         # self and *x - are input tensors
-        ctx = Ctx(arg, self, *x)
+        ctx = arg(self, *x)
         # create new resulting Tensor and passing input Tensors to it
         ret = Tensor(arg.forward(ctx, self.data, *[t.data for t in x]))
         ret._ctx = ctx

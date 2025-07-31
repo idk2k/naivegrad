@@ -50,6 +50,7 @@ py3 -m pip install -e .
 ```
 
 ## Todo
+- numeric gradient check
 - conv
 - adam
 
