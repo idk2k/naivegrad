@@ -6,16 +6,6 @@ from tqdm import trange
 from naivegrad.core_tn import Tensor
 from naivegrad.utils import fetch_mnist
 import naivegrad.optimizer as optim
-# load dataset for static version (TO REMOVE)
-# def fetch_ds(url):
-#     import gzip, requests
-#     with open(url, "rb") as src:
-#         dat = src.read()
-#     return np.frombuffer(gzip.decompress(dat), dtype=np.uint8).copy()
-# X_train = fetch_ds("train-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
-# Y_train = fetch_ds("train-labels-idx1-ubyte.gz")[8:]
-# X_test = fetch_ds("t10k-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
-# Y_test = fetch_ds("t10k-labels-idx1-ubyte.gz")[8:]
 
 def initialize_layer(m, h):
     ret = np.random.uniform(-1., 1., size=(m, h)) / np.sqrt(m * h)
@@ -37,13 +27,12 @@ class NaiveNet:
         return ret
 
 model_instance = NaiveNet()
+
+# Optimizer
 sgd_optimizer = optim.SGD([model_instance.l1, model_instance.l2], lr=0.01)
+#adam_optimizer = optim.Adam([model_instance.l1, model_instance.l2], lr=0.01)
 
-# Weights tensor. Why hidden layer is 128 ?
-# http://vbystricky.ru/2017/10/mnist_cnn.htmls
-l1 = Tensor(initialize_layer(784, 128))
-l2 = Tensor(initialize_layer(128, 10))
-
+# Train
 lr = 0.01
 batch_size = 128
 losses, accuracies = [], []
@@ -64,6 +53,9 @@ for i in (t := trange(1000)):
 
     # SGD step
     sgd_optimizer.step()
+   
+    # Adam step: BUT IMPLEMENTATION IS BAD PROBABLY: prediction 0.6
+    #adam_optimizer.step()
 
     accuracy = (np.argmax(outs.data, axis=1) == Y).mean() 
 

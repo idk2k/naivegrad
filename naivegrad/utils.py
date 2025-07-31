@@ -16,7 +16,9 @@ def fetch_mnist():
                 dat = requests.get(url).content
                 f.write(dat)
         return numpy.frombuffer(gzip.decompress(dat), dtype=numpy.uint8).copy()
+    
     # urls are fixed, cause LeCunn dont maintain his ds
+    # https://github.com/pytorch/vision/issues/3549
     X_train = fetch("https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
     Y_train = fetch("https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz")[8:]
     X_test = fetch("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))

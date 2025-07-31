@@ -1,4 +1,6 @@
 # naivegrad - Naive Implementation of Auto-Grad System
+[![Unit Tests](https://github.com/idk2k/naivegrad/actions/workflows/test.yml/badge.svg)](https://github.com/idk2k/naivegrad/actions/workflows/test.yml)
+
 Inspired by *grad libraries and PyTorch.
 ## Background
 Try to implement basic base-blocks of nn:
@@ -46,13 +48,13 @@ saved_tensors for backward pass, save_for_backward();
 
 ```bash
 git clone https://github.com/idk2k/naivegrad.git && cd naivegrad
+pip install -r requirements.txt
 py3 -m pip install -e .
 ```
 
 ## Todo
 - numeric gradient check
 - conv
-- adam
 
 ## Special thanks to
     - https://sidsite.com/posts/autodiff/
