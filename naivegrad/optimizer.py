@@ -5,5 +5,5 @@ class SGD:
         self.lr = lr
     
     def step(self):
-        for i in self.tensors:
-            t.data -= self.lr * t.grad
+        for tensor in self.tensors:
+            tensor.data -= self.lr * tensor.grad
