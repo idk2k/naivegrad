@@ -4,9 +4,8 @@ import numpy as np
 from tqdm import trange
 
 from naivegrad.core_tn import Tensor
-from naivegrad.nn_bundle_tn import initialize_layer, SGD
 from naivegrad.utils import fetch_mnist
-
+import naivegrad.optimizer as optim
 # load dataset for static version (TO REMOVE)
 # def fetch_ds(url):
 #     import gzip, requests
@@ -17,6 +16,10 @@ from naivegrad.utils import fetch_mnist
 # Y_train = fetch_ds("train-labels-idx1-ubyte.gz")[8:]
 # X_test = fetch_ds("t10k-images-idx3-ubyte.gz")[16:].reshape((-1, 28, 28))
 # Y_test = fetch_ds("t10k-labels-idx1-ubyte.gz")[8:]
+
+def initialize_layer(m, h):
+    ret = np.random.uniform(-1., 1., size=(m, h)) / np.sqrt(m * h)
+    return ret.astype(np.float32)
 
 # load ds
 X_train, Y_train, X_test, Y_test = fetch_mnist()
@@ -34,7 +37,7 @@ class NaiveNet:
         return ret
 
 model_instance = NaiveNet()
-sgd_optimizer = SGD([model_instance.l1, model_instance.l2], lr=0.01)
+sgd_optimizer = optim.SGD([model_instance.l1, model_instance.l2], lr=0.01)
 
 # Weights tensor. Why hidden layer is 128 ?
 # http://vbystricky.ru/2017/10/mnist_cnn.htmls
