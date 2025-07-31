@@ -65,7 +65,7 @@ for i in (t := trange(1000)):
     # SGD step
     sgd_optimizer.step()
 
-    accuracy = (cat == Y).mean() 
+    accuracy = (np.argmax(outs.data, axis=1) == Y).mean() 
 
     loss = loss.data
     losses.append(loss)

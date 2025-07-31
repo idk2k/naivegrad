@@ -1,7 +1,11 @@
-def fetch_mnist():
+def fetch_mnist(windows=True):
     def fetch(url):
         import requests, gzip, os, hashlib, numpy
-        fp = os.path.join("/tmp", hashlib.md5(url.encode('utf-8')).hexdigest())
+        if windows:
+            #print(f"path: {os.getcwd()}\\tmp")
+            fp = os.path.join(os.getcwd() + "\\tmp", hashlib.md5(url.encode('utf-8')).hexdigest())
+        else:
+            fp = os.path.join("/tmp", hashlib.md5(url.encode('utf-8')).hexdigest())
         if os.path.isfile(fp):
             with open(fp, "rb") as f:
                 dat = f.read()
