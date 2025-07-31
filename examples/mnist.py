@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import numpy as np
 from tqdm import trange
 
@@ -7,6 +6,7 @@ from naivegrad.core_tn import Tensor
 from naivegrad.utils import fetch_mnist
 import naivegrad.optimizer as optim
 
+np.random.seed(1337)
 def initialize_layer(m, h):
     ret = np.random.uniform(-1., 1., size=(m, h)) / np.sqrt(m * h)
     return ret.astype(np.float32)
@@ -42,12 +42,14 @@ for i in (t := trange(1000)):
     x = Tensor(X_train[samp].reshape((-1, 28*28)))
     Y = Y_train[samp]
     y = np.zeros((len(samp), 10), np.float32)
-    y[range(y.shape[0]), Y] = -1.0
+    # torch nll return one per row
+    y[range(y.shape[0]), Y] = -10.0
     y = Tensor(y)
 
     outs = model_instance.forward(x)
 
-    # NLL loss
+    # NLL (Negative Log-Likelihood) loss
+    # https://docs.pytorch.org/docs/stable/generated/torch.nn.NLLLoss.html
     loss = outs.mul(y).mean()
     loss.backward()
 
