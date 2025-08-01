@@ -83,7 +83,7 @@ for i in (t := trange(steps)):
     t.set_description(f"loss={loss.item():.2f}, accuracy={accuracy.item():.2f}")
 
 def predict():
-    Y_test_predict_out = model_instance.forward(Tensor(X_test.reshape((-1, 28*28))))
+    Y_test_predict_out = model_instance.forward(Tensor(X_test.reshape((-1, 28*28)).astype(np.float32)))
     Y_test_predict = np.argmax(Y_test_predict_out.data, axis=1)
     return (Y_test == Y_test_predict).mean()
 
