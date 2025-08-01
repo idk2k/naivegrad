@@ -50,7 +50,7 @@ class Tensor:
         return self.sum().mul(div)
 
     def __repr__(self) -> str:
-        return f"Tensor(data={self.data}, grad={self.grad})"
+        return f"(data={self.data}, grad={self.grad})"
 
 # class instance of Function stores implicit Context of OP
 class Function:
