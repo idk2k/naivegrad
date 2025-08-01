@@ -38,6 +38,8 @@ class Tensor:
             grads = [grads]
         # for each parent a
         for t, g in zip(self._ctx.parents, grads):
+            if g is None:
+                continue
             if g.shape != t.data.shape:
                 print(f"[err]: grad must match with tensor in _ctx={self._ctx}, g.shape={g.shape} t.data.shape={t.data.shape}")
                 assert(False)
@@ -83,6 +85,18 @@ def register(name, fxn):
     setattr(Tensor, name, partialmethod(fxn.apply, fxn))
 
 # ** OPS **
+
+class Reshape(Function):
+    @staticmethod
+    def forward(ctx, x, shape):
+        ctx.save_for_backward(x.shape)
+        return x.reshape(shape)
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        shape, = ctx.saved_tensors
+        return grad_output.reshape(shape), None
+register('reshape', Reshape)
 
 # https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html
 class ReLU(Function):

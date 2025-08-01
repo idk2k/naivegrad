@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 import numpy as np
+import os
 from tqdm import trange
 
 from naivegrad.core_tn import Tensor
 from naivegrad.utils import fetch_mnist, initialize_layer_uniform
 import naivegrad.optimizer as optim
+
+# CONFIG VAR
+CONV = 0
 
 np.random.seed(1337)
 
@@ -23,20 +27,35 @@ class NaiveNet:
         ret = x.dot(self.l1).relu().dot(self.l2).logsoftmax()
         return ret
 
-model_instance = NaiveNet()
+class NaiveConvolutionNet:
+    def __init__(self) -> None:
+        self.chans = 4
+        self.c1 = Tensor(initialize_layer_uniform(self.chans, 1, 3, 3))
+        self.l1 = Tensor(initialize_layer_uniform(26 * 26 * self.chans, 128))
+        self.l2 = Tensor(initialize_layer_uniform(128, 10))
+    
+    def forward(self, x):
+        x.data = x.data.reshape((-1, 1, 28, 28))
+        x = x.conv2d(self.c1).reshape(Tensor(np.array((-1, 26 * 26 * self.chans)))).relu()
+        return x.dot(self.l1).relu().dot(self.l2).logsoftmax()
 
-# Optimizer
-#sgd_optimizer = optim.SGD([model_instance.l1, model_instance.l2], lr=0.001)
-adam_optimizer = optim.Adam([model_instance.l1, model_instance.l2], lr=0.001)
-
+if CONV == 1:
+    model_instance = NaiveConvolutionNet()
+    optimizer_instance = optim.Adam([model_instance.c1, model_instance.l1, model_instance.l2], lr=0.001)
+    steps = 400
+else:
+    model_instance = NaiveNet()
+    optimizer_instance = optim.SGD([model_instance.l1, model_instance.l2], lr=0.001)
+    steps = 1000
+        
 # Train
 lr = 0.01
 batch_size = 128
 losses, accuracies = [], []
-for i in (t := trange(1000)):
+for i in (t := trange(steps)):
     samp = np.random.randint(0, X_train.shape[0], size=(batch_size))
 
-    x = Tensor(X_train[samp].reshape((-1, 28*28)))
+    x = Tensor(X_train[samp].reshape((-1, 28 * 28)).astype(np.float32))
     Y = Y_train[samp]
     y = np.zeros((len(samp), 10), np.float32)
     # torch nll return one per row
@@ -54,7 +73,7 @@ for i in (t := trange(1000)):
     #sgd_optimizer.step()
    
     # Adam step: BUT IMPLEMENTATION IS BAD PROBABLY: prediction 0.6
-    adam_optimizer.step()
+    optimizer_instance.step()
 
     accuracy = (np.argmax(out.data, axis=1) == Y).mean() 
 
