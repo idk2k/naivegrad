@@ -36,16 +36,26 @@ class TestNaivegrad(unittest.TestCase):
             return out.detach().numpy(), x.grad, W.grad
         
         for x, y in zip(test_naivegrad(), test_pytorch()):
-            np.testing.assert_allclose(x, y, atol=1e-5)
+            np.testing.assert_allclose(x, y, atol=1e-5) 
         
     def test_conv2d(self):
-        x = torch.randn((5, 2, 10, 7))
-        w = torch.randn((4, 2, 3, 3))
-
+        x = torch.randn((5, 2, 10, 7), requires_grad=True)
+        w = torch.randn((4, 2, 3, 3), requires_grad=True)
+        xn = Tensor(x.detach().numpy())
+        wn = Tensor(w.detach().numpy())
+        
         out = torch.nn.functional.conv2d(x, w)
-        #ret = Conv2D.apply(Conv2D, Tensor(x.numpy()), Tensor(w.numpy()))
-        ret = Tensor(x.numpy()).conv2d(Tensor(w.numpy()))
-        np.testing.assert_allclose(ret.data, out.numpy(), atol=1e-5)
+        ret = Conv2D.apply(Conv2D, xn, wn)
+        #ret = Tensor(x.numpy()).conv2d(Tensor(w.numpy()))
+        
+        np.testing.assert_allclose(ret.data, out.detach().numpy(), atol=1e-5)
+
+        out.mean().backward()
+        ret.mean().backward()
+
+        np.testing.assert_allclose(x.grad, xn.grad, atol=1e-5)
+        np.testing.assert_allclose(w.grad, wn.grad, atol=1e-5)
+
 
 if __name__ == '__main__':
     unittest.main()
