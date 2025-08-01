@@ -16,6 +16,8 @@ class Tensor:
         assert isinstance(data, np.ndarray), (
             "[err]: failed to construct Tensor instance"
         )
+        if data.dtype == np.float64:
+            print("[WARNING ngrad]: float64 tensor constructed - some bugs may appear. Be careful")
         self.data = data
         self.grad = None
 
@@ -48,7 +50,7 @@ class Tensor:
             t.backward(False)
 
     def mean(self):
-        div = Tensor(np.array([1 / self.data.size]))
+        div = Tensor(np.array([1 / self.data.size], dtype=self.data.dtype))
         return self.sum().mul(div)
 
     def __repr__(self) -> str:
