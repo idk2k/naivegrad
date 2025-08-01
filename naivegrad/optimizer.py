@@ -27,8 +27,8 @@ class Adam(Optimizer):
 
     # https://en.wikipedia.org/wiki/Stochastic_gradient_descent#Adam
     def step(self):
+        self.t += 1
         for i, t in enumerate(self.params):
-            self.t += 1
             self.m[i] = self.b1 * self.m[i] + (1 - self.b1) * t.grad
             self.v[i] = self.b2 * self.v[i] + (1 - self.b2) * np.square(t.grad)
             mhat = self.m[i] / (1.0 - self.b1**self.t)
