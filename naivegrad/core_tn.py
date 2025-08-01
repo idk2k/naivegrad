@@ -67,11 +67,14 @@ class Function:
         self.saved_tensors.extend(tns)
 
     def apply(self, arg, *x):
-        # generate context for that operation: arg is OPS function (i.e. ReLU)
-        # self and *x - are input tensors
-        ctx = arg(self, *x)
-        # create new resulting Tensor and passing input Tensors to it
-        ret = Tensor(arg.forward(ctx, self.data, *[t.data for t in x]))
+        if type(arg) == Tensor:
+            op = self
+            x = [arg] + list(x)
+        else:
+            op = arg
+            x = [self] + list(x)
+        ctx = op(*x)
+        ret = Tensor(op.forward(ctx, *[t.data for t in x]))
         ret._ctx = ctx
         return ret
     
@@ -170,3 +173,24 @@ class LogSoftmax(Function):
         output, = ctx.saved_tensors
         return grad_output - np.exp(output) * grad_output.sum(axis=1).reshape((-1, 1))
 register("logsoftmax", LogSoftmax)
+
+# https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+class Conv2D(Function):
+    @staticmethod
+    def forward(ctx, x, w):
+        cout, cin, H, W = w.shape
+        ret = np.zeros((x.shape[0], cout, x.shape[2] - (H - 1), x.shape[3] - (W - 1)), dtype=w.dtype)
+        for Y in range(ret.shape[2]):
+            for X in range(ret.shape[3]):
+                for j in range(H):
+                    for i in range(W):
+                        for c in range(cout):
+                            tx = x[:, :, Y + j, X + i]
+                            tw = w[c, :, j, i]
+                            ret[:, c, Y, X] += tx.dot(tw.reshape(-1, 1)).reshape(-1)
+        return ret
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        raise Exception("no backward pass for Conv2D")
+register('conv2d', Conv2D)

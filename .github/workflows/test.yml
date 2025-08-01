@@ -22,7 +22,7 @@ jobs:
       run: pip install -e ~/work/naivegrad/naivegrad/
     - name: Run Mnist
       run: ipython3 examples/mnist.py
-    - name: Run Other Tests
-      run: |
-        ipython3 tests/test_core_tn.py
-        ipython3 examples/demo/demo_tensor_example.py
+    - name: Run Dmo
+      run: ipython3 examples/demo/demo_tensor_example.py
+    - name: Run Tests
+      run: ipython3 tests/test_core_tn.py
