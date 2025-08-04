@@ -22,9 +22,9 @@ def test_sanity_check() -> None:
     xpt, ypt = x, y
 
     # forward pass check
-    assert ymg.data == ypt.data.item()
+    assert yng.data == ypt.data.item()
     # backward pass check
-    assert xmg.grad = ypt.grad.item()
+    assert xng.grad == ypt.grad.item()
 
 def test_more_ops() -> None:
     a: Scalar = Scalar(-4.0)
