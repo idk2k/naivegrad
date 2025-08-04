@@ -53,7 +53,7 @@ class Scalar:
         return self * other**-1
 
     def __rtruediv__(self, rother: Union["Scalar", float]) -> "Scalar":
-        return other * self**-1
+        return rother * self**-1
 
     def __pow__(self, other: Union[int, float]) -> "Scalar":
         assert isinstance(other, (int, float)), "[warn]: direct support for int/floats"
