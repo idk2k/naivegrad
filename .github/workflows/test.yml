@@ -17,12 +17,8 @@ jobs:
       with:
         python-version: 3.8
     - name: Install Dependencies
-      run: pip install ipython tqdm requests numpy torch
+      run: pip install pytest tqdm requests numpy torch
     - name: Install naivegrad
       run: pip install -e ~/work/naivegrad/naivegrad/
-    - name: Run Mnist
-      run: ipython3 examples/mnist.py
-    - name: Run Demo
-      run: ipython3 examples/demo/demo_tensor_example.py
-    - name: Run Tests
-      run: ipython3 tests/test_core_tn.py
+    - name: Run Pytest
+      run: python -m pytest -s -v
