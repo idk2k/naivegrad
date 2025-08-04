@@ -78,8 +78,10 @@ py3 -m pip install -e .
 ```
 
 ## Todo
-- numeric gradient check
-- conv
+- conv2d +
+- adam with simd +
+- numeric gradient check (using J)?
+
 
 ## Special thanks to
     - https://sidsite.com/posts/autodiff/
