@@ -22,7 +22,8 @@ class Tensor:
             "[err]: failed to construct Tensor instance"
         )
         if data.dtype == np.float64:
-            print("[WARNING ngrad]: float64 tensor constructed - some bugs may appear. Be careful")
+            #print("[WARNING ngrad]: float64 tensor constructed - some bugs may appear. Be careful")
+            pass
         self.data = data
         self.grad = None
 
