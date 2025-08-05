@@ -4,7 +4,7 @@
 Inspired by *grad libraries and PyTorch.
 ## Background
 Try to implement basic base-blocks of nn:
-- `optimizers: Adam, SGD`
+- `optimizers: RMSProp, Adam, SGD`
 - `forward pass graph creation`
 - two mode `auto-differentiation` (reverse/`backward` and `forward`)
 - `gradient accumulators in ctx`
@@ -81,6 +81,7 @@ py3 -m pip install -e .
 - conv2d +
 - adam with simd +
 - numeric gradient check (using J)?
+- RMSProp (+)
 
 
 ## Special thanks to

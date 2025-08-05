@@ -34,3 +34,20 @@ class Adam(Optimizer):
             mhat = self.m[i] / (1.0 - self.b1**self.t)
             vhat = self.v[i] / (1.0 - self.b2**self.t)
             t.data -= self.lr * mhat / (np.sqrt(vhat) + self.eps)
+
+# https://docs.pytorch.org/docs/stable/generated/torch.optim.RMSprop.html
+# https://education.yandex.ru/handbook/ml/article/metody-optimizacii-v-deep-learning
+class RMSProp(Optimizer):
+    def __init__(self, params, lr=0.001, decay=0.9, eps=1e-8):
+        super(RMSProp, self).__init__(params)
+        self.lr = lr
+        self.decay = decay
+        self.eps = eps
+        self.t = 0
+        self.v = [np.zeros_like(t.data) for t in self.params]
+
+    def step(self):
+        self.t += 1
+        for i, t in enumerate(self.params):
+            self.v[i] = self.decay * self.v[i] + (1 - self.decay) * np.square(t.grad)
+            t.data -= (self.lr / np.sqrt(self.v[i] + self.eps)) * t.grad
