@@ -8,7 +8,7 @@ def jacobian(func, input):
 
     ji = input.data.reshape(-1).shape[-1]
     jo = output.data.reshape(-1).shape[-1]
-    J = np.zeros((jo, ji))
+    J = np.zeros((jo, ji), dtype=np.float32)
 
     for o in range(jo):
         o_scalar = Tensor(mask_like(output.data, o, 1.)).mul(output).sum()
@@ -23,7 +23,7 @@ def numerical_jacobian(func, input, eps=1e-6):
 
     ji = input.data.reshape(-1).shape[-1]
     jo = output.data.reshape(-1).shape[-1]
-    NJ = np.zeros((jo, ji))
+    NJ = np.zeros((jo, ji), dtype=np.float32)
 
     for o in range(jo):
         for i in range(ji):
