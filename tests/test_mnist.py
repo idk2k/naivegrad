@@ -11,8 +11,6 @@ import naivegrad.optimizer as optim
 # CONFIG VAR
 CONV = 1
 
-np.random.seed(1337)
-
 # load ds
 X_train, Y_train, X_test, Y_test = fetch_mnist()
 
@@ -42,68 +40,68 @@ class NaiveConvolutionNet:
         x = x.reshape(Tensor(np.array((x.shape[0], -1))))
         return x.dot(self.l1).relu().dot(self.l2).logsoftmax()
 
+def train_model(model, optimizer, steps, batch_size=128):
+    batch_size = 128
+    losses, accuracies = [], []
+    for i in (t := trange(steps)):
+        samp = np.random.randint(0, X_train.shape[0], size=(batch_size))
+
+        x = Tensor(X_train[samp].reshape((-1, 28 * 28)).astype(np.float32))
+        Y = Y_train[samp]
+        y = np.zeros((len(samp), 10), np.float32)
+        # torch nll return one per row
+        y[range(y.shape[0]), Y] = -10.0
+        y = Tensor(y)
+
+        out = model.forward(x)
+
+        # NLL (Negative Log-Likelihood) loss
+        # https://docs.pytorch.org/docs/stable/generated/torch.nn.NLLLoss.html
+        loss = out.mul(y).mean()
+        loss.backward()
+
+        # SGD step
+        #sgd_optimizer.step()
+    
+        # Adam step: BUT IMPLEMENTATION IS BAD PROBABLY: prediction 0.6
+        optimizer.step()
+
+        accuracy = (np.argmax(out.data, axis=1) == Y).mean() 
+
+        loss = loss.data
+        losses.append(loss)
+        accuracies.append(accuracy)
+        t.set_description(f"loss={loss.item():.2f}, accuracy={accuracy.item():.2f}")
+
+def evaluate_model(model):
+    def numpy_evaluate_model():
+        Y_test_predict_out = model.forward(Tensor(X_test.reshape((-1, 28*28)).astype(np.float32)))
+        Y_test_predict = np.argmax(Y_test_predict_out.data, axis=1)
+        return (Y_test == Y_test_predict).mean()
+
+    # Prediction
+    accuracy = numpy_evaluate_model()
+    print("Prediction: ", accuracy)
+    assert accuracy > .95
+
 class TestMNIST(unittest.TestCase):
-    def test_mnist(self):
-        def train_model(model, optimizer, steps, batch_size=128):
-            batch_size = 128
-            losses, accuracies = [], []
-            for i in (t := trange(steps)):
-                samp = np.random.randint(0, X_train.shape[0], size=(batch_size))
-
-                x = Tensor(X_train[samp].reshape((-1, 28 * 28)).astype(np.float32))
-                Y = Y_train[samp]
-                y = np.zeros((len(samp), 10), np.float32)
-                # torch nll return one per row
-                y[range(y.shape[0]), Y] = -10.0
-                y = Tensor(y)
-
-                out = model.forward(x)
-
-                # NLL (Negative Log-Likelihood) loss
-                # https://docs.pytorch.org/docs/stable/generated/torch.nn.NLLLoss.html
-                loss = out.mul(y).mean()
-                loss.backward()
-
-                # SGD step
-                #sgd_optimizer.step()
-            
-                # Adam step: BUT IMPLEMENTATION IS BAD PROBABLY: prediction 0.6
-                optimizer.step()
-
-                accuracy = (np.argmax(out.data, axis=1) == Y).mean() 
-
-                loss = loss.data
-                losses.append(loss)
-                accuracies.append(accuracy)
-                t.set_description(f"loss={loss.item():.2f}, accuracy={accuracy.item():.2f}")
-
-        def evaluate_model(model):
-            def numpy_evaluate_model():
-                Y_test_predict_out = model.forward(Tensor(X_test.reshape((-1, 28*28)).astype(np.float32)))
-                Y_test_predict = np.argmax(Y_test_predict_out.data, axis=1)
-                return (Y_test == Y_test_predict).mean()
-
-           # Prediction
-            accuracy = numpy_evaluate_model()
-            print("Prediction: ", accuracy)
-            assert accuracy > .95
-
-        # Models with different optimizers setup
+    def test_mnist_conv(self):
+        np.random.seed(1337)
         model = NaiveConvolutionNet()
         optimizer = optim.Adam([model.c1, model.l1, model.l2], lr=0.001)
-        steps = 400
-        train_model(model, optimizer, steps) # batch is 128
+        train_model(model, optimizer, steps=400)
         evaluate_model(model)
-
+    
+    def test_mnist_sgd(self):
         model = NaiveNet()
         optimizer = optim.SGD([model.l1, model.l2], lr=0.001)
-        steps = 1000
-        train_model(model, optimizer, steps)
+        train_model(model, optimizer, steps=1000)
         evaluate_model(model)
-        
+    
+    def test_mnist_rmsprop(self):        
         model = NaiveNet()
         optimizer = optim.RMSProp([model.l1, model.l2], lr=0.001)
-        train_model(model, optimizer, steps)
+        train_model(model, optimizer, steps=1000)
         evaluate_model(model)
 
 if __name__ == '__main__':
