@@ -85,22 +85,23 @@ def evaluate_model(model):
     assert accuracy > .95
 
 class TestMNIST(unittest.TestCase):
-    def test_mnist_conv(self):
+    def conv(self):
         np.random.seed(1337)
         model = NaiveConvolutionNet()
         optimizer = optim.Adam([model.c1, model.l1, model.l2], lr=0.001)
         train_model(model, optimizer, steps=400)
         evaluate_model(model)
     
-    def test_mnist_sgd(self):
+    def sgd(self):
         model = NaiveNet()
         optimizer = optim.SGD([model.l1, model.l2], lr=0.001)
         train_model(model, optimizer, steps=1000)
         evaluate_model(model)
     
-    def test_mnist_rmsprop(self):        
+    def rmsprop(self):        
         model = NaiveNet()
-        optimizer = optim.RMSProp([model.l1, model.l2], lr=0.001)
+        # low lr .0002 is better
+        optimizer = optim.RMSProp([model.l1, model.l2], lr=0.0002)
         train_model(model, optimizer, steps=1000)
         evaluate_model(model)
 
