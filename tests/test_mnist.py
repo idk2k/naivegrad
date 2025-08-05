@@ -31,9 +31,9 @@ class NaiveNet:
 class NaiveConvolutionNet:
     def __init__(self) -> None:
         conv = 7
-        self.chans = 4
-        self.c1 = Tensor(initialize_layer_uniform(self.chans, 1, conv, conv))
-        self.l1 = Tensor(initialize_layer_uniform(((28 - conv + 1)**2) * self.chans, 128))
+        chans = 4
+        self.c1 = Tensor(initialize_layer_uniform(chans, 1, conv, conv))
+        self.l1 = Tensor(initialize_layer_uniform(((28 - conv + 1)**2) * chans, 128))
         self.l2 = Tensor(initialize_layer_uniform(128, 10))
     
     def forward(self, x):
