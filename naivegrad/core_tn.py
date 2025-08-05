@@ -54,6 +54,10 @@ class Tensor:
         div = Tensor(np.array([1 / self.data.size], dtype=self.data.dtype))
         return self.sum().mul(div)
 
+    @property
+    def shape(self):
+        return self.data.shape
+
     def __repr__(self) -> str:
         return f"(data={self.data}, grad={self.grad})"
 
