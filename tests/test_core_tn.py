@@ -4,7 +4,7 @@
 import numpy as np
 import torch
 import unittest
-from naivegrad.core_tn import Tensor, Conv2D
+from naivegrad.core_tn import Tensor
 from naivegrad.gradcheck import numerical_jacobian, jacobian, gradcheck
 
 # initialization
@@ -75,7 +75,7 @@ class TestNaivegrad(unittest.TestCase):
         wn = Tensor(w.detach().numpy())
         
         out = torch.nn.functional.conv2d(x, w)
-        ret = Conv2D.apply(Conv2D, xn, wn)
+        ret = Tensor.conv2d(xn, wn)
         #ret = Tensor(x.numpy()).conv2d(Tensor(w.numpy()))
         
         np.testing.assert_allclose(ret.data, out.detach().numpy(), atol=1e-5)

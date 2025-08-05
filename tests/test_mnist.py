@@ -28,7 +28,7 @@ class NaiveNet:
 
 class NaiveConvolutionNet:
     def __init__(self) -> None:
-        conv = 7
+        conv = 5
         chans = 8
         self.c1 = Tensor(initialize_layer_uniform(chans, 1, conv, conv))
         self.l1 = Tensor(initialize_layer_uniform(((28 - conv + 1)**2) * chans, 128))
