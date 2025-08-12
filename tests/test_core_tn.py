@@ -68,6 +68,7 @@ class TestNaivegrad(unittest.TestCase):
         self.assertTrue(gradcheck(tiny_func, tiny_x))
         self.assertFalse(gradcheck(tiny_func, tiny_x, eps=0.1))
 
+class TestOps(unittest.TestCase):
     def test_conv2d(self):
         x = torch.randn((5, 2, 10, 7), requires_grad=True)
         w = torch.randn((4, 2, 3, 3), requires_grad=True)
@@ -86,6 +87,19 @@ class TestNaivegrad(unittest.TestCase):
         np.testing.assert_allclose(x.grad, xn.grad, atol=1e-5)
         np.testing.assert_allclose(w.grad, wn.grad, atol=1e-5)
 
+    def test_maxpool2x2(self):
+        x = torch.randn((5, 2, 10, 8), requires_grad=True)
+        xt = Tensor(x.detach().numpy())
+
+        ret = xt.maxpool2x2()
+        assert ret.shape == (5, 2, 10 // 2, 8 // 2)
+        ret.mean().backward()
+
+        out = torch.nn.MaxPool2d((2, 2))(x)
+        out.mean().backward()
+
+        np.testing.assert_allclose(ret.data, out.detach().numpy(), atol=1e-5)
+        np.testing.assert_allclose(x.grad, xt.grad, atol=1e-5)
 
 if __name__ == '__main__':
     unittest.main()
