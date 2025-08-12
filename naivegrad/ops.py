@@ -1,0 +1,179 @@
+import numpy as np
+from naivegrad.core_tn import Function, register
+from naivegrad.utils import col2im, im2col
+
+class Reshape(Function):
+    @staticmethod
+    def forward(ctx, x, shape):
+        ctx.save_for_backward(x.shape)
+        return x.reshape(shape)
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        shape, = ctx.saved_tensors
+        return grad_output.reshape(shape), None
+register('reshape', Reshape)
+
+# https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html
+class ReLU(Function):
+    @staticmethod
+    def forward(ctx, input):
+        ctx.save_for_backward(input)
+        return np.maximum(input, 0)
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, = ctx.saved_tensors
+        grad_input = grad_output.copy()
+        grad_input[input < 0] = 0
+        return grad_input
+register("relu", ReLU)
+
+# https://github.com/Emperor-WS/PyEmber/blob/main/ember/autograd/function.py
+# https://numpy.org/doc/stable/reference/generated/numpy.dot.html
+# 2D.dot(2D) = 2D @ 2D (matrix mult)
+class Dot(Function):
+    @staticmethod
+    def forward(ctx, input, weight):
+        ctx.save_for_backward(input, weight)
+        return input.dot(weight)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, weight = ctx.saved_tensors
+        grad_input = grad_output.dot(weight.T)
+        grad_weight = grad_output.T.dot(input).T
+        return grad_input, grad_weight
+register("dot", Dot)
+
+# https://numpy.org/doc/stable/reference/generated/numpy.sum.html
+class Sum(Function):
+    @staticmethod
+    def forward(ctx, input):
+        ctx.save_for_backward(input)
+        return np.array([input.sum()])
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, = ctx.saved_tensors
+        return grad_output * np.ones_like(input)
+register("sum", Sum)
+
+# as simple as possible to understand
+class Mul(Function):
+    @staticmethod
+    def forward(ctx, x, y):
+        ctx.save_for_backward(x, y)
+        # not dot and not matrix multiplication
+        # * - multiplication each term of x with each corresponding term in y
+        # @ - matmul
+        return x * y
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        x, y = ctx.saved_tensors
+        return y * grad_output, x * grad_output
+register("mul", Mul)
+
+class Add(Function):
+    @staticmethod
+    def forward(ctx, x, y):
+        ctx.save_for_backward(x, y)
+        return x + y
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        # actually its grad_output * 1
+        return grad_output, grad_output
+register("add", Add)
+
+# https://docs.pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html
+class LogSoftmax(Function):
+    @staticmethod
+    def forward(ctx, input):
+        def logsume(x):
+            c = x.max(axis=1)
+            return c + np.log( np.exp( x - c.reshape((-1, 1)) ).sum(axis=1) )
+        output = input - logsume(input).reshape((-1, 1))
+        ctx.save_for_backward(output)
+        return output
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        output, = ctx.saved_tensors
+        return grad_output - np.exp(output) * grad_output.sum(axis=1).reshape((-1, 1))
+register("logsoftmax", LogSoftmax)
+
+# https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+class Conv2D(Function):
+    @staticmethod
+    def forward(ctx, x, w):
+        cout, cin, H, W = w.shape
+        tw = w.reshape(cout, -1).T
+        bs, oy, ox = x.shape[0], x.shape[2] - (H - 1), x.shape[3] - (W - 1)
+        ctx.save_for_backward(x, w)
+
+        ret = np.zeros((bs, cout, oy, ox), dtype=w.dtype)
+        tw = w.reshape(w.shape[0], -1).T
+        for Y in range(oy):
+            for X in range(ox):
+                tx = x[:, :, Y:Y + H, X:X + W].reshape(bs, -1)
+                ret[:, :, Y, X] = tx.dot(tw)
+        return ret
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        bs, _, oy, ox = grad_output.shape    
+        x, w = ctx.saved_tensors
+        cout, cin, H, W = w.shape
+        tw = w.reshape(cout, -1)
+
+        dx, dw = np.zeros_like(x), np.zeros_like(w)
+        for Y in range(grad_output.shape[2]):
+            for X in range(grad_output.shape[3]):
+                gg = grad_output[:, :, Y, X]
+                tx = x[:, :, Y:Y + H, X:X + W].reshape(x.shape[0], -1)
+                dw += gg.T.dot(tx).reshape(dw.shape)
+                dx[:, :, Y:Y + H, X:X + W] += gg.dot(tw).reshape(dx.shape[0], dx.shape[1], H, W)
+        return dx, dw
+#register('conv2d', Conv2D)
+
+class FastConv2D(Function):
+    @staticmethod
+    def forward(ctx, x, w):
+        cout, cin, H, W = w.shape
+        tw = w.reshape(cout, -1).T
+        bs, oy, ox = x.shape[0], x.shape[2] - (H - 1), x.shape[3] - (W - 1)
+
+        # im2col
+        tx = im2col(x, H, W)
+
+        # try to save BIG output of im2col
+        ctx.save_for_backward(tx, w)
+
+        # Convolution is now is GEMM
+        ret = tx.dot(tw).reshape(oy, ox, bs, cout)
+
+        # good ordering
+        return np.moveaxis(ret, [0, 1, 2, 3], [2, 3, 0, 1])
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        bs, _, oy, ox = grad_output.shape    
+        tx, w = ctx.saved_tensors
+        cout, cin, H, W = w.shape
+        tw = w.reshape(cout, -1)
+
+        # order
+        gg = np.moveaxis(grad_output, [0, 1, 2, 3], [2, 3, 0, 1]).reshape(-1, cout)
+
+        # dw - easy
+        dw = gg.T.dot(tx).reshape(w.shape)
+
+        # dx - superhard
+        dxi = gg.dot(tw)
+
+        # col2im on backward pass (bec im2col on forward)
+        dx = col2im(dxi, H, W, oy + (H - 1), ox + (W - 1))
+        return dx, dw
+register('conv2d', FastConv2D)

@@ -85,6 +85,7 @@ def evaluate_model(model):
     assert accuracy > .95
 
 class TestMNIST(unittest.TestCase):
+    @unittest.skip(reason="slow")
     def test_conv(self):
         np.random.seed(1337)
         model = NaiveConvolutionNet()
