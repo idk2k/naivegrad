@@ -84,8 +84,8 @@ class TestOps(unittest.TestCase):
         out.mean().backward()
         ret.mean().backward()
 
-        np.testing.assert_allclose(x.grad, xn.grad, atol=1e-5)
-        np.testing.assert_allclose(w.grad, wn.grad, atol=1e-5)
+        np.testing.assert_allclose(x.grad, xn.grad, atol=1e-7)
+        np.testing.assert_allclose(w.grad, wn.grad, atol=1e-7)
 
     def test_maxpool2x2(self):
         x = torch.randn((5, 2, 10, 8), requires_grad=True)

@@ -152,10 +152,10 @@ class FastConv2D(Function):
         ctx.save_for_backward(tx, w)
 
         # Convolution is now is GEMM
-        ret = tx.dot(tw).reshape(oy, ox, bs, cout)
+        ret = tx.dot(tw).reshape(bs, oy, ox, cout)
 
         # good ordering
-        return np.moveaxis(ret, [0, 1, 2, 3], [2, 3, 0, 1])
+        return np.moveaxis(ret, [0, 1, 2, 3], [0, 2, 3, 1])
     
     @staticmethod
     def backward(ctx, grad_output):
@@ -165,7 +165,7 @@ class FastConv2D(Function):
         tw = w.reshape(cout, -1)
 
         # order
-        gg = np.moveaxis(grad_output, [0, 1, 2, 3], [2, 3, 0, 1]).reshape(-1, cout)
+        gg = np.moveaxis(grad_output, [0, 1, 2, 3], [0, 2, 3, 1]).reshape(-1, cout)
 
         # dw - easy
         dw = gg.T.dot(tx).reshape(w.shape)
