@@ -71,7 +71,7 @@ class TestNaivegrad(unittest.TestCase):
 class TestOps(unittest.TestCase):
     def test_conv2d(self):
         x = torch.randn((5, 2, 10, 7), requires_grad=True)
-        w = torch.randn((4, 2, 3, 3), requires_grad=True)
+        w = torch.randn((4, 2, 3, 2), requires_grad=True)
         xn = Tensor(x.detach().numpy())
         wn = Tensor(w.detach().numpy())
         
