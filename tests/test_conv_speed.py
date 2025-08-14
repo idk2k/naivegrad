@@ -6,7 +6,7 @@ try:
     prof = line_profiler.LineProfiler()
     builtins.__dict__['profile'] = prof
 except ImportError:
-    pass
+    prof = None
 
 import cProfile
 import unittest
