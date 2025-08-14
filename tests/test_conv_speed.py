@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
-import time
-import cProfile
-import pstats
-import unittest
-from naivegrad.core_tn import Tensor
-
+# one variant: is use line_profiler
 try:
     import line_profiler
     prof = line_profiler.LineProfiler()
@@ -13,6 +8,12 @@ try:
     builtins.__dict__['profile'] = prof
 except ImportError:
     prof = None
+
+import time
+import cProfile
+import pstats
+import unittest
+from naivegrad.core_tn import Tensor
 
 def profile_conv(bs, chans, conv, cnt=10):
     img = Tensor.zeroes(bs, 1, 28, 28)
